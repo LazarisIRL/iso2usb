@@ -6,15 +6,35 @@ Uses dd to write a bootable USB drive, but with several checks to prevent a user
 
 This is a personal project for me to learn bash scripting. AI was not used except for some regex syntax, and sanity checking the finished code.
 
-Warning
+## WARNING
 
 This script permanently overwrites the target device with dd. There is no undo. Double check the device path (uing lsblk or similar) before confirming. The script's built in checks (removable flag, size, transport type, mount status) are there to catch common mistakes, but they are not a substitute for checking lsblk output yourself.
 
-Requirements
+## Install
 
-curl
-dd
-sha256sum
-lsblk
-numfmt 
-root privileges (writing to a raw block device requires it)
+```bash
+curl -O https://raw.githubusercontent.com/<your-username>/iso2usb/main/iso2usb
+chmod +x iso2usb
+```
+
+## Usage
+
+```bash
+sudo ./iso2usb <url> <device>
+```
+
+**Example:**
+
+```bash
+sudo ./iso2usb https://releases.example.com/distro.iso /dev/sdb
+```
+Run with `-h` or `--help` for a quick usage summary.
+
+## Requirements
+
+- curl
+- dd
+- sha256sum
+- lsblk
+- numfmt 
+- root privileges (writing to a raw block device requires it)
