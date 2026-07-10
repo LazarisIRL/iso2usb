@@ -1,0 +1,191 @@
+#!/bin/bash
+#iso2usb
+#	Makes a bootable USB from an ISO URL
+#	Pipes an ISO URL directly into a USB device and verifies the write
+# Example: iso2usb https://releases.example.com/distro.iso /dev/sdb
+
+set -euo pipefail
+
+#colour variables
+RED='\e[0;31m'
+YEL='\e[1;33m'
+GRN='\e[0;32m'
+BLU='\e[0;34m'
+BLD='\e[1m'
+RST='\e[0m'
+
+#helper functions
+die()	{ echo -e "${RED}ERROR:${RST} $*" >&2; exit 1; }
+info()	{ echo -e "${BLU}::${RST} $*"; }
+ok()	{ echo -e "${GRN}[OK]${RST} $*"; }
+warn()	{ echo -e "${YEL}[!!]${RST} $*"; }
+
+#usage helper
+usage() {
+	echo -e "${BLD}iso2usb${RST} stream an ISO from a URL directly to a USB device"
+	echo
+	echo -e "	Usage: $(basename "$0") <url> <device>"
+	echo -e "	Example: $(basename "$0") https://releases.example.com/distro.iso /dev/sdb"
+	echo -e "	Options:"
+	echo -e "		-h, --help	Show this help"
+	exit 0
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && usage
+[[ $# -ne 2 ]] && usage
+
+URL="$1"
+DEVICE="$2"
+
+#check the script can actually run
+[[ $EUID -ne 0 ]] && die "must be run as root"
+
+command -v curl		&>/dev/null || die "'curl' not found. Install it first"
+command -v dd		&>/dev/null || die "'dd' not found. Install it first"
+command -v sha256sum	&>/dev/null || die "'sha256sum' not found. Install it first"
+command -v lsblk	&>/dev/null || die "'lsblk' not found. Install it first"
+
+#validate the URL
+[[ "$URL" =~ ^https?:// ]] || die "URL must begin with http:// or https://"
+
+#check that the specified  USB device actually exists and is a block device
+[[ -e "$DEVICE" ]] || die "device '$DEVICE' does not exist"
+[[ -b "$DEVICE" ]] || die "device '$DEVICE' is not a block device"
+
+#check if the kernel recognises the device as removable
+REMOVABLE=$(cat "/sys/block/$(basename "$DEVICE")/removable" 2>/dev/null)
+if [[ "$REMOVABLE" != "1" ]]; then
+	warn "Device does not appear to be removable"
+	echo -ne "${YEL}Are you sure this is a USB stick? [y/N]:${RST} "
+	read -r yn
+	[[ "$yn" =~ ^[yY]$ ]] || die "Aborting"
+fi
+
+#check if the device is suspiciously large...
+SIZE_BYTES=$(lsblk -bno SIZE "$DEVICE" | head -1)
+SIZE_GB=$(( SIZE_BYTES / 1024 / 1024 / 1024 ))
+if [[ $SIZE_GB -gt 256 ]]; then
+	warn "Device is ${SIZE_GB}GB which is unusually large for a USB stick"
+	echo -ne "${YEL}Continue anyway? [y/N]:${RST} "
+	read -r yn
+	[[ "$yn" =~ ^[yY]$ ]] || die "Aborting"
+fi
+
+#check the transport type and confirm it is actually connected via usb
+TRANSPORT=$(lsblk -no TRAN "$DEVICE" | head -1 | tr -d '[:space:]')
+if [[ "$TRANSPORT" != "usb" ]]; then
+	warn "Device transport is '${TRANSPORT}', not USB"
+	echo -ne "${YEL}Continue anyway? [y/N]:${RST} "
+	read -r yn
+	[[ "$yn" =~ ^[yY]$ ]] || die "Aborting"
+fi
+
+#show device info
+echo
+echo -e "${BLD}Target device:${RST}"
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL "$DEVICE" 2>/dev/null || true
+echo
+echo -e "${BLD}Source URL:${RST} $URL"
+echo
+
+#check if the device is mounted and offer to unmount it
+if lsblk -no MOUNTPOINT "$DEVICE" 2>/dev/null | grep -q .; then
+        warn "'$DEVICE' or one of its partitions is mounted"
+        echo -ne "${YEL}Unmount it now? [y/N]:${RST} "
+        read -r yn
+        if [[ "$yn" =~ ^[yY]$ ]]; then
+                info "Unmounting '$DEVICE'..."
+		udisksctl power-off -b "$DEVICE" 2>/dev/null && \
+		ok "Unmounted successfully"
+        else
+                die "'$DEVICE' is mounted: unmount it manually first"
+        fi
+fi
+
+#force user to manually confirm
+warn "This will ${RED}${BLD}PERMANENTLY OVERWRITE${RST} everything on ${BLD}${DEVICE}${RST}"
+warn "Make sure it is the ${GRN}${BLD}correct${RST} device!!"
+echo -ne "${YEL}Type the device name to confirm [${DEVICE}]: ${RST}"
+read -r CONFIRM
+
+[[ "$CONFIRM" = "$DEVICE" ]] || die "device name does not match: try again but next time don't be dumb"
+
+#---------------------------MAIN PROGRAM START------------------------------
+
+echo
+info "streaming ISO -> $DEVICE ..."
+echo
+
+#send curl through a tee
+#	- one copy goes to dd and writes to the device
+#	- second copy goes to sha256sum for the checksum
+#	- extract ISO size from header information
+
+SOURCE_SUM_FILE=$(mktemp) #make a temporary file so the subshell has somewhere to pass the data
+trap 'rm -f "$SOURCE_SUM_FILE"' EXIT
+
+ISO_SIZE=$(curl -sI -L "$URL" |
+	grep -i content-length | tail -1 | tr -d '[:space:]' | cut -d: -f2)
+
+curl -L --fail --progress-bar "$URL" |
+	tee >(sha256sum | awk '{print $1}' > "$SOURCE_SUM_FILE") |
+	#------MAIN DD COMMAND-----------
+	dd of="$DEVICE" bs=4M oflag=sync status=none
+
+echo
+info "synchronising..."
+sync
+
+#rewriting variable name to make later reading easier
+SOURCE_SHA=$(cat "$SOURCE_SUM_FILE")
+rm -f "$SOURCE_SUM_FILE"
+
+ok "write complete"
+echo -e "	Source SHA256: ${BLD}${SOURCE_SHA}${RST}"
+
+#checksum verification
+echo
+info "Reading from device to verify integrity..."
+
+#check bytes read = bytes written
+#	- get ISO size by reading Content-Length, or fall back to device read byte count
+#	- read the same byte count dd reported via a re-read
+#	- use the source checksum byte count from a HEAD request
+
+if [[ -n "$ISO_SIZE" && "$ISO_SIZE" =~ ^[0-9]+$ ]]; then
+	info "ISO size from server: $(numfmt --to=iec "$ISO_SIZE")"
+	FULL_BLOCKS=$(( ISO_SIZE / 4194304 ))
+	REMAINDER=$(( ISO_SIZE % 4194304 ))
+	DEVICE_SHA=$(
+		{
+			dd if="$DEVICE" bs=4M count="$FULL_BLOCKS" status=progress
+			dd if="$DEVICE" bs=1 count="$REMAINDER" skip="$((FULL_BLOCKS * 4194304))" iflag=skip_bytes status=none
+		} | sha256sum | awk '{print $1}'
+	)
+
+else
+	warn "Could not determine ISO size from Content-Length header."
+	warn "Skipping byte-exact read-back. Verify manually with:"
+	echo "	sha256sum <original.iso>"
+	echo "  sudo dd if=$DEVICE bs=4M status=none | head -c <bytes> | sha256sum"
+	exit 0
+fi
+
+echo -e "	Device SHA-256: ${BLD}${DEVICE_SHA}${RST}"
+echo
+
+#verify the checksums match
+if [[ "$SOURCE_SHA" == "$DEVICE_SHA" ]]; then
+	ok "${GRN}${BLD}Checksums match — device verified successfully!${RST}"
+else
+	die "Checksum MISMATCH. The write may be corrupted. Run $(basename "$0") again"
+fi
+
+#reread the partition table
+info "Refreshing device..."
+partprobe "$DEVICE" 2>/dev/null || true
+udevadm trigger --action=change "$DEVICE" 2>/dev/null || true
+udevadm settle 2>/dev/null || true
+
+echo
+info "Done. You can safely remove ${DEVICE}."
