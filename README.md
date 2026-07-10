@@ -1,2 +1,2 @@
 # iso2usb
-Streams an ISO URL directly to a USB
+Makes a bootable USB from an ISO URL
