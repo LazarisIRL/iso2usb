@@ -21,7 +21,7 @@ This is a personal project for me to learn bash scripting. AI was not used excep
 
 ## WARNING
 
-This script permanently overwrites the target device with `dd`. There is no undo. Double check the device path (uing lsblk or similar) before confirming. The script's built in checks (removable flag, size, transport type, mount status) are there to catch common mistakes, but they are not a substitute for checking lsblk output yourself.
+This script permanently overwrites the target device with `dd`. There is no undo. Double check the device path (uing lsblk or similar) before confirming. The script's built in checks are there to catch common mistakes, but they are not a substitute for checking `lsblk` output yourself.
 
 ## Installation
 
