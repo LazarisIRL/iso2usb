@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-#colour variables
+#text formatting variables
 RED='\e[0;31m'
 YEL='\e[1;33m'
 GRN='\e[0;32m'
