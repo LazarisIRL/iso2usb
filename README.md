@@ -13,7 +13,7 @@ This script permanently overwrites the target device with dd. There is no undo. 
 ## Install
 
 ```bash
-curl -O https://raw.githubusercontent.com/<your-username>/iso2usb/main/iso2usb
+curl -O https://raw.githubusercontent.com/LazarisIRL/iso2usb/refs/heads/main/iso2usb
 chmod +x iso2usb
 ```
 
