@@ -8,20 +8,20 @@ This is a personal project for me to learn bash scripting. AI was not used excep
 
 ## Features
 - **No intermediate file**
-    The ISO is piped directly from the download into `dd`
+    -The ISO is piped directly from the download into `dd`
 - **Checksum verification**
     After writing, the script rereads the exact number of bytes reported by the server's `Content-Length` HTTP header response and compares SHA256 sums.
 - **Safety checks before writing:**
-  - Confirms the target is a valid block device
-  - Warns if the device isn't flagged as removable
-  - Warns if the device is unusually large for a USB stick
-  - Warns if the device's transport isn't USB
-  - Checks if the device is currently mounted and offers to unmount if so.
-  - Requires you to type the exact device name (e.g. `/dev/sda`) to confirm before it overwrites anything
+    - Confirms the target is a valid block device
+    - Warns if the device isn't flagged as removable
+    - Warns if the device is unusually large for a USB stick
+    - Warns if the device's transport isn't USB
+    - Checks if the device is currently mounted and offers to unmount if so.
+    - Requires the user to type the exact device name (e.g. `/dev/sda`) to confirm before it overwrites anything
 
 ## WARNING
 
-This script permanently overwrites the target device with dd. There is no undo. Double check the device path (uing lsblk or similar) before confirming. The script's built in checks (removable flag, size, transport type, mount status) are there to catch common mistakes, but they are not a substitute for checking lsblk output yourself.
+This script permanently overwrites the target device with `dd`. There is no undo. Double check the device path (uing lsblk or similar) before confirming. The script's built in checks (removable flag, size, transport type, mount status) are there to catch common mistakes, but they are not a substitute for checking lsblk output yourself.
 
 ## Installation
 
