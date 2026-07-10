@@ -165,7 +165,7 @@ if [[ -n "$ISO_SIZE" && "$ISO_SIZE" =~ ^[0-9]+$ ]]; then
 
 else
 	warn "Could not determine ISO size from Content-Length header."
-	warn "Skipping byte-exact read-back. Verify manually with:"
+	warn "Skipping byte exact read back. Verify manually with:"
 	echo "	sha256sum <original.iso>"
 	echo "  sudo dd if=$DEVICE bs=4M status=none | head -c <bytes> | sha256sum"
 	exit 0
