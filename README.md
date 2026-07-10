@@ -40,12 +40,12 @@ sudo install -m 755 iso2usb /usr/local/bin/iso2usb
 ## Usage
 
 ```bash
-sudo ./iso2usb <url> <device>
+sudo iso2usb <url> <device>
 ```
 **Example:**
 
 ```bash
-sudo ./iso2usb https://releases.example.com/distro.iso /dev/sda
+sudo iso2usb https://releases.example.com/distro.iso /dev/sda
 ```
 Run with option flags `-h` or `--help`
 
