@@ -10,11 +10,14 @@ This is a personal project for me to learn bash scripting. AI was not used excep
 
 This script permanently overwrites the target device with dd. There is no undo. Double check the device path (uing lsblk or similar) before confirming. The script's built in checks (removable flag, size, transport type, mount status) are there to catch common mistakes, but they are not a substitute for checking lsblk output yourself.
 
-## Install
+## Installation
+
+Superuser privilages are required for this script to run (writing to a raw block device requires it). Script should be moved to /usr/local/bin or installed at the same location.
 
 ```bash
 curl -O https://raw.githubusercontent.com/LazarisIRL/iso2usb/refs/heads/main/iso2usb
 chmod +x iso2usb
+sudo install -m 744 iso2usb /usr/local/bin/iso2usb
 ```
 
 ## Usage
@@ -37,4 +40,4 @@ Run with `-h` or `--help` for a quick usage summary.
 - sha256sum
 - lsblk
 - numfmt 
-- root privileges (writing to a raw block device requires it)
+- root privileges 
