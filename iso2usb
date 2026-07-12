@@ -1,12 +1,12 @@
 #!/bin/bash
 #iso2usb
-#	Makes a bootable USB from an ISO URL
-#	Pipes an ISO URL directly into a USB device and verifies the write
-# Example: iso2usb https://releases.example.com/distro.iso /dev/sdb
+#	- makes a bootable USB from an ISO URL
+#	- pipes an ISO URL directly into a USB device and verifies the write
+#Example: iso2usb https://releases.example.com/distro.iso /dev/sdb
 
 set -euo pipefail
 
-#text formatting variables
+#colour variables
 RED='\e[0;31m'
 YEL='\e[1;33m'
 GRN='\e[0;32m'
@@ -44,9 +44,20 @@ command -v curl		&>/dev/null || die "'curl' not found. Install it first"
 command -v dd		&>/dev/null || die "'dd' not found. Install it first"
 command -v sha256sum	&>/dev/null || die "'sha256sum' not found. Install it first"
 command -v lsblk	&>/dev/null || die "'lsblk' not found. Install it first"
+command -v numfmt	&>/dev/null || die "'numfmt' not found. Install it first"
+command -v wipefs	&>/dev/null || die "'wipefs' not found. Install it first"
 
 #validate the URL
 [[ "$URL" =~ ^https?:// ]] || die "URL must begin with http:// or https://"
+
+#check that the content looks like an ISO
+CONTENT_TYPE=$(curl -sI -L "$URL" | grep -i content-type | tail -1)
+if [[ "$CONTENT_TYPE" != *"octet-stream"* && "$CONTENT_TYPE" != *"iso"* ]]; then
+    warn "Unexpected content type: ${CONTENT_TYPE}"
+    echo -ne "${YEL}This doesn't look like an ISO. Continue anyway? [y/N]:${RST} "
+    read -r yn
+    [[ "$yn" =~ ^[yY]$ ]] || die "Aborting"
+fi
 
 #check that the specified  USB device actually exists and is a block device
 [[ -e "$DEVICE" ]] || die "device '$DEVICE' does not exist"
@@ -111,6 +122,11 @@ read -r CONFIRM
 [[ "$CONFIRM" = "$DEVICE" ]] || die "device name does not match: try again but next time don't be dumb"
 
 #---------------------------MAIN PROGRAM START------------------------------
+
+#wipe any old headers off the device
+info "Wiping existing signatures from device..."
+wipefs -a "$DEVICE" 2>/dev/null || die "Failed to wipe device signatures"
+ok "Device wiped"
 
 echo
 info "streaming ISO -> $DEVICE ..."
@@ -181,7 +197,7 @@ else
 	die "Checksum MISMATCH. The write may be corrupted. Run $(basename "$0") again"
 fi
 
-#reread the partition table
+#re-read the partition table
 info "Refreshing device..."
 partprobe "$DEVICE" 2>/dev/null || true
 udevadm trigger --action=change "$DEVICE" 2>/dev/null || true
