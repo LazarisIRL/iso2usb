@@ -9,7 +9,7 @@ This is a personal project for me to learn bash scripting. AI was not used excep
 
 ## Features
 - **No intermediate file**
-    -The ISO is piped directly from the download into `dd`
+    The ISO is piped directly from the download into `dd`
 - **Checksum verification**
     After writing, the script rereads the exact number of bytes reported by the server's `Content-Length` HTTP header response and compares SHA256 sums.
 - **Safety checks before writing:**
