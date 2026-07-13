@@ -1,11 +1,13 @@
 # iso2usb
-Makes a bootable USB from an ISO URL
+Makes a bootable USB from an ISO URL, easily from within a terminal.
 
 Stream an ISO straight from a URL onto a USB device. No need to download the file first, no intermediate storage, and the write is verified with a SHA-256 checksum afterwards.
 Uses `dd` to write a bootable USB drive, but with several checks to prevent a user from "disc destoying" their boot partition or something.
 
 How is this better than Ventoy, Netboot or even BalenaEtcher you ask? It isn't. Use those tools instead. 
-This is a personal project for me to learn bash scripting. AI was not used except for some regex syntax, and sanity checking the finished code.
+This is a personal project for fun, and to learn bash scripting. 
+
+AI was not used except for some regex syntax, researching available command line tools, and sanity checking the finished code.
 
 ## Features
 - **No intermediate file**
