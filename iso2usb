@@ -1,10 +1,12 @@
 #!/bin/bash
 #iso2usb
-#	- makes a bootable USB from an ISO URL
-#	- pipes an ISO URL directly into a USB device and verifies the write
+#	makes a bootable USB from an ISO URL
+#	pipes an ISO URL directly into a USB device and verifies the write
 #Example: iso2usb https://releases.example.com/distro.iso /dev/sdb
 
 set -euo pipefail
+
+#-------HOUSEKEEPING STUFF---------
 
 #colour variables
 RED='\e[0;31m'
@@ -19,6 +21,16 @@ die()	{ echo -e "${RED}ERROR:${RST} $*" >&2; exit 1; }
 info()	{ echo -e "${BLU}::${RST} $*"; }
 ok()	{ echo -e "${GRN}[OK]${RST} $*"; }
 warn()	{ echo -e "${YEL}[!!]${RST} $*"; }
+
+#cleanup temp files
+SOURCE_SUM_FILE=""
+cleanup() { 
+	rm -f "$SOURCE_SUM_FILE"; 
+}
+trap cleanup EXIT
+SOURCE_SUM_FILE=$(mktemp)
+
+#-------INITIALISATION-------
 
 #usage helper
 usage() {
@@ -133,12 +145,9 @@ info "streaming ISO -> $DEVICE ..."
 echo
 
 #send curl through a tee
-#	- one copy goes to dd and writes to the device
-#	- second copy goes to sha256sum for the checksum
-#	- extract ISO size from header information
-
-SOURCE_SUM_FILE=$(mktemp) #make a temporary file so the subshell has somewhere to pass the data
-trap 'rm -f "$SOURCE_SUM_FILE"' EXIT
+#	one copy goes to dd and writes to the device
+#	second copy goes to sha256sum for the checksum
+#	extract ISO size from header information
 
 ISO_SIZE=$(curl -sI -L "$URL" |
 	grep -i content-length | tail -1 | tr -d '[:space:]' | cut -d: -f2)
@@ -154,7 +163,6 @@ sync
 
 #rewriting variable name to make later reading easier
 SOURCE_SHA=$(cat "$SOURCE_SUM_FILE")
-rm -f "$SOURCE_SUM_FILE"
 
 ok "write complete"
 echo -e "	Source SHA256: ${BLD}${SOURCE_SHA}${RST}"
@@ -164,9 +172,9 @@ echo
 info "Reading from device to verify integrity..."
 
 #check bytes read = bytes written
-#	- get ISO size by reading Content-Length, or fall back to device read byte count
-#	- read the same byte count dd reported via a re-read
-#	- use the source checksum byte count from a HEAD request
+#	get ISO size by reading Content-Length, or fall back to device read byte count
+#	read the same byte count dd reported via a re-read
+#	use the source checksum byte count from a HEAD request
 
 if [[ -n "$ISO_SIZE" && "$ISO_SIZE" =~ ^[0-9]+$ ]]; then
 	info "ISO size from server: $(numfmt --to=iec "$ISO_SIZE")"
