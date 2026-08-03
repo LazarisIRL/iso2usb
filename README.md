@@ -31,7 +31,7 @@ AI was not used except for some regex syntax, researching available command line
     - Alpine Linux
     - Kali Linux
     - openSUSE Leap
-    - Debian 
+    - Debian Netinstall
 
 ## WARNING
 
@@ -56,12 +56,21 @@ sudo install -m 755 iso2usb /usr/local/bin/iso2usb
 ```bash
 sudo iso2usb <url> <device>
 ```
+```bash
+sudo iso2usb --pick <device>
+```
+
 **Example:**
 
+With a standard ISO URL:
 ```bash
 sudo iso2usb https://releases.example.com/distro.iso /dev/sda
 ```
-Run with option flags `-h` or `--help`
+To select from a list of supported distros:
+```bash
+sudo iso2usb --pick /dev/sda
+```
+Run with option flags `-h`, `--help` or `--pick`
 
 ## Requirements
 
