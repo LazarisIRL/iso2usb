@@ -22,9 +22,6 @@ info()	{ echo -e "${BLU}::${RST} $*"; }
 ok()	{ echo -e "${GRN}[OK]${RST} $*"; }
 warn()	{ echo -e "${YEL}[!!]${RST} $*"; }
 
-#check the script can actually run
-[[ $EUID -ne 0 ]] && die "must be run as root"
-
 #dependencies - I think a lot of these are standard, but we might as well check for them. 
 command -v curl			&>/dev/null || die "'curl' not found. Install it first"
 command -v dd			&>/dev/null || die "'dd' not found. Install it first"
@@ -101,6 +98,9 @@ usage() {
 }
 
 [[ "${1:-}" =~ ^(-h|--help)$ ]] && usage
+
+#check the script can actually run
+[[ $EUID -ne 0 ]] && die "must be run as root"
 
 if [[ "${1:-}" == "--pick" ]]; then
     [[ $# -ne 2 ]] && die "Usage: $(basename "$0") --pick <device>"
