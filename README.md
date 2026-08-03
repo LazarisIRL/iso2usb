@@ -1,7 +1,7 @@
 # iso2usb
 Makes a bootable USB from an ISO URL, easily from within a terminal.
 
-Stream an ISO straight from a URL onto a USB device. No need to download the file first, and no intermediate storage required. The write is verified with a SHA-256 checksum afterwards, but note this only checks the write itself, it does not check against the distro provided checksum (yet).
+Stream an ISO straight from a URL onto a USB device. No need to download the file first, and no intermediate storage required. The write is verified with a SHA-256 checksum afterwards.
 Uses `dd` to write a bootable USB drive, but with several checks to prevent a user from "disc destoying" their boot partition or something.
 
 How is this better than Ventoy, Netboot or even BalenaEtcher you ask? It isn't. Use those tools instead. 
@@ -14,6 +14,7 @@ AI was not used except for some regex syntax, researching available command line
     The ISO is piped directly from the download into `dd`
 - **Checksum verification**
     After writing, the script rereads the exact number of bytes reported by the server's `Content-Length` HTTP header response and compares SHA256 sums.
+    Note this only checks the write itself, it does not check against the distro provided checksum (yet).
 - **Safety checks before writing:**
     - Confirms the target is a valid block device
     - Warns if the device isn't flagged as removable
@@ -21,6 +22,15 @@ AI was not used except for some regex syntax, researching available command line
     - Warns if the device's transport isn't USB
     - Checks if the device is currently mounted and offers to unmount if so.
     - Requires the user to type the exact device name (e.g. `/dev/sda`) to confirm before it overwrites anything
+- **Distro Picker (Experimental)**
+    Interactive list of distros which can be selected WITHOUT having the URL in advance
+    (Some distros support a latest/current tag which can be utilised for this purpose) 
+    Supported distros:
+        - Arch Linux
+        - Alpine Linux
+        - Kali Linux
+        - openSUSE Leap
+        - Debian 
 
 ## WARNING
 
