@@ -25,12 +25,12 @@ AI was not used except for some regex syntax, researching available command line
 - **Distro Picker (Experimental)**
     Interactive list of distros which can be selected WITHOUT having the URL in advance
     (Some distros support a latest/current tag which can be utilised for this purpose) 
-    Supported distros:
-        - Arch Linux
-        - Alpine Linux
-        - Kali Linux
-        - openSUSE Leap
-        - Debian 
+    Supported distros
+    - Arch Linux
+    - Alpine Linux
+    - Kali Linux
+    - openSUSE Leap
+    - Debian 
 
 ## WARNING
 
