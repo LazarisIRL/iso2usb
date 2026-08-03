@@ -62,8 +62,11 @@ command -v wipefs	&>/dev/null || die "'wipefs' not found. Install it first"
 #validate the URL
 [[ "$URL" =~ ^https?:// ]] || die "URL must begin with http:// or https://"
 
+#get the headers from the URL
+HEADERS=$(curl -sI -L "$URL")
+
 #check that the content looks like an ISO
-CONTENT_TYPE=$(curl -sI -L "$URL" | grep -i content-type | tail -1)
+CONTENT_TYPE=$(echo "$HEADERS" | grep -i content-type | tail -1)
 if [[ "$CONTENT_TYPE" != *"octet-stream"* && "$CONTENT_TYPE" != *"iso"* ]]; then
     warn "Unexpected content type: ${CONTENT_TYPE}"
     echo -ne "${YEL}This doesn't look like an ISO. Continue anyway? [y/N]:${RST} "
@@ -149,8 +152,7 @@ echo
 #	second copy goes to sha256sum for the checksum
 #	extract ISO size from header information
 
-ISO_SIZE=$(curl -sI -L "$URL" |
-	grep -i content-length | tail -1 | tr -d '[:space:]' | cut -d: -f2)
+ISO_SIZE=$(echo "$HEADERS" | grep -i content-length | tail -1 | tr -d '[:space:]' | cut -d: -f2)
 
 curl -L --fail --progress-bar "$URL" |
 	tee >(sha256sum | awk '{print $1}' > "$SOURCE_SUM_FILE") |
