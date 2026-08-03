@@ -25,12 +25,12 @@ warn()	{ echo -e "${YEL}[!!]${RST} $*"; }
 #dependencies - I think a lot of these are standard, but we might as well check for them. 
 command -v curl			&>/dev/null || die "'curl' not found. Install it first"
 command -v dd			&>/dev/null || die "'dd' not found. Install it first"
-command -v sha256sum	&>/dev/null || die "'sha256sum' not found. Install it first"
+command -v sha256sum		&>/dev/null || die "'sha256sum' not found. Install it first"
 command -v lsblk		&>/dev/null || die "'lsblk' not found. Install it first"
 command -v numfmt		&>/dev/null || die "'numfmt' not found. Install it first"
 command -v wipefs		&>/dev/null || die "'wipefs' not found. Install it first"
-command -v udisksctl	&>/dev/null || die "'udisksctl' not found. Install it first"
-command -v partprobe	&>/dev/null || die "'partprobe' not found. Install it first"
+command -v udisksctl		&>/dev/null || die "'udisksctl' not found. Install it first"
+command -v partprobe		&>/dev/null || die "'partprobe' not found. Install it first"
 command -v awk			&>/dev/null || die "'awk' not found. Install it first"
 
 #cleanup temp files
@@ -86,10 +86,12 @@ pick_distro() {
 usage() {
 	echo -e "${BLD}iso2usb${RST} stream an ISO from a URL directly to a USB device"
 	echo
-	echo -e "	Usage: $(basename "$0") <url> <device>"
+	echo -e "	Usage:"
+	echo -e "		$(basename "$0") <url> <device>"
 	echo -e "		$(basename "$0") --pick <device>"
 	echo
-	echo -e "	Example: $(basename "$0") https://releases.example.com/distro.iso /dev/sdb"
+	echo -e "	Example:"
+	echo -e "		$(basename "$0") https://releases.example.com/distro.iso /dev/sdb"
 	echo -e "		$(basename "$0") --pick /dev/sdb"
 	echo
 	echo -e "	Options:"
@@ -260,7 +262,7 @@ echo
 
 #verify the checksums match
 if [[ "$SOURCE_SHA" == "$DEVICE_SHA" ]]; then
-	ok "${GRN}${BLD}Checksums match — device verified successfully!${RST}"
+	ok "${GRN}${BLD}Checksums match. Device verified successfully!${RST}"
 else
 	die "Checksum MISMATCH. The write may be corrupted. Run $(basename "$0") again"
 fi
