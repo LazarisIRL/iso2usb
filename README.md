@@ -23,9 +23,10 @@ AI was not used except for some regex syntax, researching available command line
     - Checks if the device is currently mounted and offers to unmount if so.
     - Requires the user to type the exact device name (e.g. `/dev/sda`) to confirm before it overwrites anything
 - **Distro Picker (Experimental)**
-    Interactive list of distros which can be selected WITHOUT having the URL in advance
-    (Some distros support a latest/current tag which can be utilised for this purpose) 
-    Supported distros
+    Interactive list of distros which can be selected WITHOUT having the URL in advance.
+    <br> (Some distros have a latest/current tag which can be utilised for this purpose).
+  
+    Currently supported distros:
     - Arch Linux
     - Alpine Linux
     - Kali Linux
