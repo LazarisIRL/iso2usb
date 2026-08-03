@@ -10,7 +10,7 @@ This is a personal project for fun, and to learn bash scripting.
 AI was not used except for some regex syntax, researching available command line tools, and sanity checking the finished code.
 
 ## Features
-- **No intermediate file**
+- **No intermediate file**<br>
     The ISO is piped directly from the download into `dd`
 - **Checksum verification**
     After writing, the script rereads the exact number of bytes reported by the server's `Content-Length` HTTP header response and compares SHA256 sums.
@@ -22,7 +22,7 @@ AI was not used except for some regex syntax, researching available command line
     - Warns if the device's transport isn't USB
     - Checks if the device is currently mounted and offers to unmount if so.
     - Requires the user to type the exact device name (e.g. `/dev/sda`) to confirm before it overwrites anything
-- **Distro Picker (Experimental)**
+- **Distro Picker (Experimental)**<br>
     Interactive list of distros which can be selected WITHOUT having the URL in advance.
     <br> (Some distros have a latest/current tag which can be utilised for this purpose).
   
@@ -74,9 +74,14 @@ Run with option flags `-h`, `--help` or `--pick`
 
 ## Requirements
 
+- root privileges 
 - curl
 - dd
 - sha256sum
 - lsblk
-- numfmt 
-- root privileges 
+- numfmt
+- wipefs
+- udisksctl
+- partprobe
+- awk
+
