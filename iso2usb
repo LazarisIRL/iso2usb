@@ -35,8 +35,8 @@ command -v awk			&>/dev/null || die "'awk' not found. Install it first"
 
 #cleanup temp files
 SOURCE_SUM_FILE=""
-cleanup() { 
-	rm -f "$SOURCE_SUM_FILE"; 
+cleanup() {
+	rm -f "$SOURCE_SUM_FILE";
 }
 trap cleanup EXIT
 SOURCE_SUM_FILE=$(mktemp)
@@ -47,38 +47,37 @@ SOURCE_SUM_FILE=$(mktemp)
 #would be very cool if all distros had  stable URL... for this purpose anyway
 
 DISTROS=(
-    "arch|Arch Linux|https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
-    "alpine|Alpine Linux|https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-x86_64-latest.iso"
-    "debian|Debian Netinstall|https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-current-amd64-netinst.iso"
+	"arch|Arch Linux|https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
 	"opensuse|openSUSE Leap|https://download.opensuse.org/distribution/openSUSE-stable/installer/iso/agama-installer.x86_64-Leap_16.0.iso"
-    "kali|Kali Linux|https://cdimage.kali.org/current/kali-linux-current-live-amd64.iso"
+	"debian|Debian Netinstall (13.6.0)|https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.6.0-amd64-netinst.iso"
+	"kali|Kali Linux (2026.2)|https://cdimage.kali.org/current/kali-linux-2026.2-live-amd64.iso"
 )
 
 pick_distro() {
-    echo
-    echo -e "${BLD}Available distros:${RST}"
-    echo
-    local i=1
-    for distro in "${DISTROS[@]}"; do
-        local name
-        name=$(echo "$distro" | cut -d'|' -f2)
-        echo -e "  $i) $name"
-        (( i++ ))
-    done
-    echo
-    echo -ne "${YEL}Select a distro [1-${#DISTROS[@]}]: ${RST}"
-    read -r choice
+	echo
+	echo -e "${BLD}Available distros:${RST}"
+	echo
+	local i=1
+	for distro in "${DISTROS[@]}"; do
+        	local name
+        	name=$(echo "$distro" | cut -d'|' -f2)
+        	echo -e "  $i) $name"
+        	(( i++ ))
+	done
+	echo
+	echo -ne "${YEL}Select a distro [1-${#DISTROS[@]}]: ${RST}"
+	read -r choice
 
 #TO DO: die is harsh here. would like to make it so user can just try again. While loop?
 	if [[ ! "$choice" =~ ^[1-9][0-9]*$ ]] || [[ "$choice" -gt "${#DISTROS[@]}" ]]; then
-        die "Invalid selection"
-    fi
+        	die "Invalid selection"
+	fi
 
-    local selected="${DISTROS[$((choice - 1))]}"
-    URL=$(echo "$selected" | cut -d'|' -f3)
-    local label
-    label=$(echo "$selected" | cut -d'|' -f2)
-    info "Selected: $label"
+	local selected="${DISTROS[$((choice - 1))]}"
+	URL=$(echo "$selected" | cut -d'|' -f3)
+	local label
+	label=$(echo "$selected" | cut -d'|' -f2)
+	info "Selected: $label"
 }
 
 #usage helper
@@ -103,14 +102,14 @@ usage() {
 [[ $EUID -ne 0 ]] && die "must be run as root"
 
 if [[ "${1:-}" == "--pick" ]]; then
-    [[ $# -ne 2 ]] && die "Usage: $(basename "$0") --pick <device>"
-    DEVICE="$2"
-    pick_distro
+	[[ $# -ne 2 ]] && die "Usage: $(basename "$0") --pick <device>"
+	DEVICE="$2"
+	pick_distro
 elif [[ $# -ne 2 ]]; then
     usage
 else
-    URL="$1"
-    DEVICE="$2"
+	URL="$1"
+	DEVICE="$2"
 fi
 
 #---------------INITIALISATION----------------
@@ -123,12 +122,12 @@ fi
 HEADERS=$(curl -sI -L "$URL")
 
 #check that the content looks like an ISO
-CONTENT_TYPE=$(echo "$HEADERS" | grep -i content-type | tail -1)
+CONTENT_TYPE=$(echo "$HEADERS" | grep -i "^content-type:" | tail -1)
 if [[ "$CONTENT_TYPE" != *"octet-stream"* && "$CONTENT_TYPE" != *"iso"* ]]; then
-    warn "Unexpected content type: ${CONTENT_TYPE}"
-    echo -ne "${YEL}This doesn't look like an ISO. Continue anyway? [y/N]:${RST} "
-    read -r yn
-    [[ "$yn" =~ ^[yY]$ ]] || die "Aborting"
+	warn "Unexpected content type: ${CONTENT_TYPE}"
+	echo -ne "${YEL}This doesn't look like an ISO. Continue anyway? [y/N]:${RST} "
+	read -r yn
+	[[ "$yn" =~ ^[yY]$ ]] || die "Aborting"
 fi
 
 #check that the specified  USB device actually exists and is a block device
@@ -197,7 +196,7 @@ read -r CONFIRM
 
 #wipe any old headers off the device
 info "Wiping existing signatures from device..."
-wipefs -a "$DEVICE" 2>/dev/null || die "Failed to wipe device signatures"
+wipefs -a "$DEVICE" &>/dev/null || die "Failed to wipe device signatures"
 ok "Device wiped"
 
 echo
