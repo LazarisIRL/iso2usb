@@ -7,7 +7,7 @@ Uses `dd` to write a bootable USB drive, but with several checks to prevent a us
 How is this better than Ventoy, Netboot or even BalenaEtcher you ask? It isn't. Use those tools instead. 
 This is a personal project for fun, and to learn bash scripting. 
 
-AI was not used except for some regex syntax, researching available command line tools, and sanity checking the finished code.
+AI was used a little bit, especially for regex syntax, researching available command line tools, and sanity checking the finished code.
 
 ## Features
 - **No intermediate file**<br>
