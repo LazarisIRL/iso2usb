@@ -30,34 +30,91 @@ cleanup() {
 trap cleanup EXIT
 SOURCE_SUM_FILE=$(mktemp)
 
-#-------INITIALISATION-------
-
 #usage helper
 usage() {
 	echo -e "${BLD}iso2usb${RST} stream an ISO from a URL directly to a USB device"
 	echo
 	echo -e "	Usage: $(basename "$0") <url> <device>"
+	echo -e "		$(basename "$0") --pick <device>"
+	echo
 	echo -e "	Example: $(basename "$0") https://releases.example.com/distro.iso /dev/sdb"
+	echo -e "		$(basename "$0") --pick /dev/sdb"
+	echo
 	echo -e "	Options:"
 	echo -e "		-h, --help	Show this help"
+	echo -e "		--pick		Pick from a (limited) list of distros"
 	exit 0
 }
 
 [[ "${1:-}" =~ ^(-h|--help)$ ]] && usage
-[[ $# -ne 2 ]] && usage
 
-URL="$1"
-DEVICE="$2"
+if [[ "${1:-}" == "--pick" ]]; then
+    [[ $# -ne 2 ]] && die "Usage: $(basename "$0") --pick <device>"
+    DEVICE="$2"
+    pick_distro
+elif [[ $# -ne 2 ]]; then
+    usage
+else
+    URL="$1"
+    DEVICE="$2"
+fi
 
 #check the script can actually run
 [[ $EUID -ne 0 ]] && die "must be run as root"
 
-command -v curl		&>/dev/null || die "'curl' not found. Install it first"
-command -v dd		&>/dev/null || die "'dd' not found. Install it first"
+#dependencies - I think a lot of these are standard, but we might as well check for them. 
+command -v curl			&>/dev/null || die "'curl' not found. Install it first"
+command -v dd			&>/dev/null || die "'dd' not found. Install it first"
 command -v sha256sum	&>/dev/null || die "'sha256sum' not found. Install it first"
-command -v lsblk	&>/dev/null || die "'lsblk' not found. Install it first"
-command -v numfmt	&>/dev/null || die "'numfmt' not found. Install it first"
-command -v wipefs	&>/dev/null || die "'wipefs' not found. Install it first"
+command -v lsblk		&>/dev/null || die "'lsblk' not found. Install it first"
+command -v numfmt		&>/dev/null || die "'numfmt' not found. Install it first"
+command -v wipefs		&>/dev/null || die "'wipefs' not found. Install it first"
+command -v udisksctl	&>/dev/null || die "'udisksctl' not found. Install it first"
+command -v partprobe	&>/dev/null || die "'partprobe' not found. Install it first"
+command -v awk			&>/dev/null || die "'awk' not found. Install it first"
+
+#-------Distro Picker-------
+#experimental feature which makes use of "latest/current" tags used by some distros
+#saves typing in a URL in some situations
+#would be very cool if all distros had  stable URL... for this purpose anyway
+
+DISTROS=(
+    "arch|Arch Linux|https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
+    "alpine|Alpine Linux|https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-x86_64-latest.iso"
+    "debian|Debian Netinstall|https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-current-amd64-netinst.iso"
+	"opensuse|openSUSE Leap|https://download.opensuse.org/distribution/openSUSE-stable/installer/iso/agama-installer.x86_64-Leap_16.0.iso"
+    "kali|Kali Linux|https://cdimage.kali.org/current/kali-linux-current-live-amd64.iso"
+)
+
+pick_distro() {
+    echo
+    echo -e "${BLD}Available distros:${RST}"
+    echo
+    local i=1
+    for distro in "${DISTROS[@]}"; do
+        local name
+        name=$(echo "$distro" | cut -d'|' -f2)
+        echo -e "  $i) $name"
+        (( i++ ))
+    done
+    echo
+    echo -ne "${YEL}Select a distro [1-${#DISTROS[@]}]: ${RST}"
+    read -r choice
+
+#TO DO: die is harsh here. would like to make it so user can just try again. While loop?
+	if [[ ! "$choice" =~ ^[1-9][0-9]*$ ]] || [[ "$choice" -gt "${#DISTROS[@]}" ]]; then
+        die "Invalid selection"
+    fi
+
+    local selected="${DISTROS[$((choice - 1))]}"
+    URL=$(echo "$selected" | cut -d'|' -f3)
+    local label
+    label=$(echo "$selected" | cut -d'|' -f2)
+    info "Selected: $label"
+}
+
+#---------------INITIALISATION----------------
+#various checks start here
 
 #validate the URL
 [[ "$URL" =~ ^https?:// ]] || die "URL must begin with http:// or https://"
@@ -147,16 +204,16 @@ echo
 info "streaming ISO -> $DEVICE ..."
 echo
 
-#send curl through a tee
-#	one copy goes to dd and writes to the device
-#	second copy goes to sha256sum for the checksum
-#	extract ISO size from header information
-
+#get the ISO size from the HTTP header
 ISO_SIZE=$(echo "$HEADERS" | grep -i content-length | tail -1 | tr -d '[:space:]' | cut -d: -f2)
 
+#send curl through a tee
+#one copy goes to sha256sum for the checksum
+#other copy goes to dd and writes to the device
 curl -L --fail --progress-bar "$URL" |
 	tee >(sha256sum | awk '{print $1}' > "$SOURCE_SUM_FILE") |
 	#------MAIN DD COMMAND-----------
+	#entire script  boils down to just this one command
 	dd of="$DEVICE" bs=4M oflag=sync status=none
 
 echo
