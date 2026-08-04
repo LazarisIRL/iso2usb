@@ -29,8 +29,6 @@ command -v sha256sum		&>/dev/null || die "'sha256sum' not found. Install it firs
 command -v lsblk		&>/dev/null || die "'lsblk' not found. Install it first"
 command -v numfmt		&>/dev/null || die "'numfmt' not found. Install it first"
 command -v wipefs		&>/dev/null || die "'wipefs' not found. Install it first"
-command -v udisksctl		&>/dev/null || die "'udisksctl' not found. Install it first"
-command -v partprobe		&>/dev/null || die "'partprobe' not found. Install it first"
 command -v awk			&>/dev/null || die "'awk' not found. Install it first"
 
 #cleanup temp files
@@ -181,8 +179,8 @@ if lsblk -no MOUNTPOINT "$DEVICE" 2>/dev/null | grep -q .; then
         read -r yn
         if [[ "$yn" =~ ^[yY]$ ]]; then
                 info "Unmounting '$DEVICE'..."
-		udisksctl power-off -b "$DEVICE" 2>/dev/null && \
-		ok "Unmounted successfully"
+				umount "${DEVICE}"?* 2>/dev/null || true
+				ok "Unmounted successfully"
         else
                 die "'$DEVICE' is mounted: unmount it manually first"
         fi
@@ -267,9 +265,9 @@ else
 	die "Checksum MISMATCH. The write may be corrupted. Run $(basename "$0") again"
 fi
 
-#re-read the partition table
+#refresh the device
 info "Refreshing device..."
-partprobe "$DEVICE" 2>/dev/null || true
+blockdev --rereadpt "$DEVICE" 2>/dev/null || true
 udevadm settle 2>/dev/null || true
 
 echo
