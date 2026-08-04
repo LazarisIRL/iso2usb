@@ -270,7 +270,6 @@ fi
 #re-read the partition table
 info "Refreshing device..."
 partprobe "$DEVICE" 2>/dev/null || true
-udevadm trigger --action=change "$DEVICE" 2>/dev/null || true
 udevadm settle 2>/dev/null || true
 
 echo
