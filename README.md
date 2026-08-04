@@ -81,7 +81,5 @@ Run with option flags `-h`, `--help` or `--pick`
 - lsblk
 - numfmt
 - wipefs
-- udisksctl
-- partprobe
 - awk
 
