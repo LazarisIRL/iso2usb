@@ -29,9 +29,19 @@ AI was used a little bit, especially for regex syntax, researching available com
     Currently supported distros:
     - Arch Linux
     - Alpine Linux
+    - Bazzite
+    - Cachy OS
+    - Debian
+    - Endevour OS
+    - Fedora
     - Kali Linux
+    - Manjaro
+    - Mint
+    - MX Linux
     - openSUSE Leap
-    - Debian Netinstall
+    - Pop! OS
+    - Ubuntu
+    - Zorin
 
 ## WARNING
 
