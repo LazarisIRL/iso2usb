@@ -48,22 +48,22 @@ SOURCE_SUM_FILE=$(mktemp)
 #would be very cool if all distros had a stable "latest/current" URL... for this purpose anyway
 
 DISTROS=(
-	arch|Arch Linux|"https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
-	alpine|Alpine Linux (3.24.0)|"https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-standard-3.24.0-x86_64.iso"
-	bazzite_amd|Bazzite AMD KDE|"https://download.bazzite.gg/bazzite-stable-live-amd64.iso"
-	bazzite_nvidia|Bazzite Nvidia KDE|"https://download.bazzite.gg/bazzite-nvidia-open-stable-live-amd64.iso"
-	cachyos|Cachy OS 260628|"https://cdn77.cachyos.org/ISO/desktop/260628/cachyos-desktop-linux-260628.iso"
-	debian|Debian Netinstall (13.6.0)|"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.6.0-amd64-netinst.iso"
-	endevouros|EndevourOS Titan Neo|"https://mirrors.gigenet.com/endeavouros/iso/EndeavourOS_Titan-Neo-2026.04.27.iso"
-	fedora|Fedora Workstation 44 Gnome|"https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/x86_64/iso/Fedora-Workstation-Live-44-1.7.x86_64.iso"
-	kali|Kali Linux (2026.2)|"https://cdimage.kali.org/current/kali-linux-2026.2-live-amd64.iso"
-	manjaro|Manjaro 26.0.4 KDE|"https://download.manjaro.org/kde/26.0.4/manjaro-kde-26.0.4-260327-linux618.iso"
-	mint|Mint 22.3 Cinnamon|"https://pub.linuxmint.io/stable/22.3/linuxmint-22.3-cinnamon-64bit.iso"
-	mxlinux|MX Linux 25.2 KDE|"https://sourceforge.net/projects/mx-linux/files/Final/KDE/MX-25.2_KDE_x64.iso/download"
-	opensuse|openSUSE Leap|"https://download.opensuse.org/distribution/openSUSE-stable/installer/iso/agama-installer.x86_64-Leap_16.0.iso"
-	popos|POP!_OS 24.04|"https://iso.pop-os.org/24.04/amd64/generic/27/pop-os_24.04_amd64_generic_27.iso"
-	ubuntu|Ubuntu 26.04|"https://releases.ubuntu.com/26.04/ubuntu-26.04-desktop-amd64.iso"
-	zorin|Zorin Core 18.1|"https://mirrors.edge.kernel.org/zorinos-isos/18/Zorin-OS-18.1-Core-64-bit.iso"
+	"arch|Arch Linux|https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
+	"alpine|Alpine Linux (3.24.0)|https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-standard-3.24.0-x86_64.iso"
+	"bazzite_amd|Bazzite AMD KDE|https://download.bazzite.gg/bazzite-stable-live-amd64.iso"
+	"bazzite_nvidia|Bazzite Nvidia KDE|https://download.bazzite.gg/bazzite-nvidia-open-stable-live-amd64.iso"
+	"cachyos|Cachy OS 260628|https://cdn77.cachyos.org/ISO/desktop/260628/cachyos-desktop-linux-260628.iso"
+	"debian|Debian Netinstall (13.6.0)|https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.6.0-amd64-netinst.iso"
+	"endevouros|EndevourOS Titan Neo|https://mirrors.gigenet.com/endeavouros/iso/EndeavourOS_Titan-Neo-2026.04.27.iso"
+	"fedora|Fedora Workstation 44 Gnome|https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/x86_64/iso/Fedora-Workstation-Live-44-1.7.x86_64.iso"
+	"kali|Kali Linux (2026.2)|https://cdimage.kali.org/current/kali-linux-2026.2-live-amd64.iso"
+	"manjaro|Manjaro 26.0.4 KDE|https://download.manjaro.org/kde/26.0.4/manjaro-kde-26.0.4-260327-linux618.iso"
+	"mint|Mint 22.3 Cinnamon|https://pub.linuxmint.io/stable/22.3/linuxmint-22.3-cinnamon-64bit.iso"
+	"mxlinux|MX Linux 25.2 KDE|https://sourceforge.net/projects/mx-linux/files/Final/KDE/MX-25.2_KDE_x64.iso/download"
+	"opensuse|openSUSE Leap|https://download.opensuse.org/distribution/openSUSE-stable/installer/iso/agama-installer.x86_64-Leap_16.0.iso"
+	"popos|POP!_OS 24.04|https://iso.pop-os.org/24.04/amd64/generic/27/pop-os_24.04_amd64_generic_27.iso"
+	"ubuntu|Ubuntu 26.04|https://releases.ubuntu.com/26.04/ubuntu-26.04-desktop-amd64.iso"
+	"zorin|Zorin Core 18.1|https://mirrors.edge.kernel.org/zorinos-isos/18/Zorin-OS-18.1-Core-64-bit.iso"
 )
 
 pick_distro() {
