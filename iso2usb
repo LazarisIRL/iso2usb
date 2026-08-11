@@ -52,7 +52,7 @@ DISTROS=(
 	"alpine|Alpine Linux (3.24.0)|https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-standard-3.24.0-x86_64.iso"
 	"bazzite_amd|Bazzite AMD KDE|https://download.bazzite.gg/bazzite-stable-live-amd64.iso"
 	"bazzite_nvidia|Bazzite Nvidia KDE|https://download.bazzite.gg/bazzite-nvidia-open-stable-live-amd64.iso"
-	"cachyos|Cachy OS 260628|https://cdn77.cachyos.org/ISO/desktop/260628/cachyos-desktop-linux-260628.iso"
+	"cachyos|Cachy OS 260628|https://cdn77.cachyos.org/ISO/desktop/260809/cachyos-desktop-linux-260809.iso"
 	"debian|Debian Netinstall (13.6.0)|https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.6.0-amd64-netinst.iso"
 	"endevouros|EndevourOS Titan Neo|https://mirrors.gigenet.com/endeavouros/iso/EndeavourOS_Titan-Neo-2026.04.27.iso"
 	"fedora|Fedora Workstation 44 Gnome|https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/x86_64/iso/Fedora-Workstation-Live-44-1.7.x86_64.iso"
